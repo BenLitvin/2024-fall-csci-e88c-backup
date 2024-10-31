@@ -16,9 +16,7 @@ lazy val root = (project in file(".")).
       "-language:higherKinds", // HKT required for Monads and other HKT types
       "-Wunused", // for scalafix
     ),
-    libraryDependencies ++= Dependencies.core ++ Dependencies.scalaTest ++ Seq(
-      "com.twitter" %% "algebird-core" % "0.13.8"  // we added Algebird dependency here
-    ),
+    libraryDependencies ++= Dependencies.core ++ Dependencies.scalaTest,
     assembly / mainClass := Some("org.cscie88c.MainApp"),
     assembly / assemblyJarName := "2024FallScalaBigData.jar",
     assembly / test := {},
@@ -34,6 +32,7 @@ lazy val root = (project in file(".")).
       ShadeRule.rename("shapeless.**" -> "shadeshapeless.@1").inAll
     )
   )
+  .enablePlugins(JavaAppPackaging)
 
 // Custom task to zip files for homework submission
 lazy val zipHomework = taskKey[Unit]("zip files for homework submission")

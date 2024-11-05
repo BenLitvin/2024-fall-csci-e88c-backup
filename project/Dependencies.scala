@@ -34,7 +34,7 @@ object Dependencies {
     "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4",
 
     // spark
-    // "org.apache.spark" %% "spark-sql" % sparkVersion % Provided, // for submiting spark app as a job to cluster
+    "org.apache.spark" %% "spark-sql" % sparkVersion % Provided, // for submiting spark app as a job to cluster
     "org.apache.spark" %% "spark-sql" % sparkVersion, // for simple standalone spark app
 
     // scio/beam

@@ -4,8 +4,6 @@
 package org.cscie88c.config
 
 import pureconfig.{ConfigReader, ConfigSource}
-import pureconfig._
-import pureconfig.generic.auto._
 import scala.reflect.ClassTag
 
 // config classes

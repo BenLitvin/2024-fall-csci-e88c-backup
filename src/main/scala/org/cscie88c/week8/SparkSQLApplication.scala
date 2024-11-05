@@ -6,29 +6,59 @@ import org.cscie88c.config.{ConfigUtils}
 import org.cscie88c.utils.{SparkUtils}
 import org.apache.spark.sql.{Dataset, DataFrame, Row}
 import pureconfig.generic.auto._
-import org.apache.spark.sql.functions.{when}
+import org.apache.spark.sql.functions.{col, when}
+import pureconfig.ConfigSource
 
-// run with: sbt "runMain org.cscie88c.week9.SparkSQLApplication"
+// run with: sbt "runMain org.cscie88c.week8.SparkSQLApplication"
 object SparkSQLApplication {
 
   def main(args: Array[String]): Unit = {
-    implicit val conf:SparkDSConfig = readConfig()
+    implicit val conf: SparkDSConfig = readConfig()
     val spark = SparkUtils.sparkSession(conf.name, conf.masterUrl)
     val transactionDF = loadData(spark)
     val augmentedTransactionsDF = addCategoryColumn(transactionDF)
     augmentedTransactionsDF.createOrReplaceTempView("transactions")
-    val sparkSQL = ???
+
+    // 4.3 ***
+    val sparkSQL = """
+      SELECT category, SUM(tran_amount) AS total
+      FROM transactions
+      GROUP BY category
+    """
     val totalsByCategoryDF = spark.sql(sparkSQL)
     printTransactionTotalsByCategory(totalsByCategoryDF)
     spark.stop()
   }
 
-  def readConfig(): SparkDSConfig = ???
+  // ***
+  def readConfig(): SparkDSConfig = {
+    ConfigSource.default
+      .at("org.cscie88c.spark-ds-application")
+      .loadOrThrow[SparkDSConfig]
+  }
 
-  def loadData(spark: SparkSession)(implicit conf: SparkDSConfig): DataFrame = ???
+  // 4.1.
+  def loadData(spark: SparkSession)(implicit conf: SparkDSConfig): DataFrame = {
+    spark.read
+      .option("header", "true")
+      .option("inferSchema", "true")
+      .csv(conf.transactionFile)
+  }
 
-  def addCategoryColumn(raw: DataFrame): DataFrame = ???
+  // 4.2.
+  def addCategoryColumn(raw: DataFrame): DataFrame = {
+    raw.withColumn(
+      "category",
+      when(col("tran_amount") > 80, "High").otherwise("Standard")
+    )
+  }
 
-  def printTransactionTotalsByCategory(df: DataFrame): Unit = ???
-
+  // 4.4.
+  def printTransactionTotalsByCategory(df: DataFrame): Unit = {
+    df.collect().foreach { row =>
+      val category = row.getAs[String]("category")
+      val total = row.getAs[Long]("total")
+      println(s"Category: $category, Total: $total")
+    }
+  }
 }
